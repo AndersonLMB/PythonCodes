@@ -66,8 +66,8 @@ def loadBranches(soup,type,url,superior):
             if county.td.a:
                 branch.name = county.td.nextSibling.a.text
                 temp = superior.url.split("/")
-                temp[len(temp)-1]=str(county.td.nextSibling.a["href"])
-                temp="/".join(temp)
+                temp[len(temp) - 1] = str(county.td.nextSibling.a["href"])
+                temp = "/".join(temp)
                 branch.url = temp
                 print(branch.superior.name + " " + branch.name)
                 branch.loadAllBranches()
@@ -81,8 +81,54 @@ def loadBranches(soup,type,url,superior):
         pass
 
     if type == "county":
-        print("load all town(s) of " + superior.name)
+        #print("load all town(s) of " + superior.name)
+        towns = soup.findAll("tr",class_="towntr")
+        branches = []
+        for town in towns:
+            branch = Node()
+            branch.superior = superior
+            branch.type = "town"
+            if town.td.a:
+                branch.name = town.td.nextSibling.a.text
+                temp = superior.url.split("/")
+                temp[len(temp) - 1] = str(town.td.nextSibling.a["href"])
+                temp = "/".join(temp)
+                branch.url = temp
+                print(branch.superior.name + " " + branch.name)
+                #print(branch.superior.name + " " + branch.name + branch.url)
+                branch.loadAllBranches()
+                pass
+            else:
+                branch.name = town.td.nextSibling.text
+                print(branch.superior.name + " " + branch.name)
+                pass
+            branches.append(branch)
         pass
+
+    if type == "town":
+        #print("load all town(s) of " + superior.name)
+        villages = soup.findAll("tr",class_="villagetr")
+        branches = []
+        for village in villages:
+            branch = Node()
+            branch.superior = superior
+            branch.type = "village"
+            if village.td.a:
+                branch.name = town.td.nextSibling.nextSibling.a.text
+                temp = superior.url.split("/")
+                temp[len(temp) - 1] = str(village.td.nextSibling.a["href"])
+                temp = "/".join(temp)
+                branch.url = temp
+                print(branch.superior.name + " " + branch.name + branch.url)
+                branch.loadAllBranches()
+                pass
+            else:
+                branch.name = village.td.nextSibling.nextSibling.text
+                print(branch.superior.name + " " + branch.name)
+                pass
+            branches.append(branch)
+        pass
+
     pass
 
 class Node():
