@@ -20,6 +20,8 @@ def bsparse(html):
     soup = bs4.BeautifulSoup(html,"html.parser",from_encoding="gb18030")
     return soup
 
+
+
 def loadBranches(soup,type,url,superior):
     if type == "nation":
         provinces = soup.findAll("a",href=True, class_=False)
@@ -32,8 +34,8 @@ def loadBranches(soup,type,url,superior):
             branch.type = "province"
             branch.superior = superior
             branch.url = url + province["href"]
-            print("------")
-            print(str(branch.superior.name) + str(branch.name))
+            print(branch.getFullname())
+            #print(str(branch.superior.name) + str(branch.name))
             branches.append(branch)
             branch.loadAllBranches()
             pass
@@ -46,10 +48,13 @@ def loadBranches(soup,type,url,superior):
             branch = Node()
             branch.name = city.td.nextSibling.a.text
             branch.superior = superior
-            branch.code = str(city.td.a["href"]).split("/")[1].split(str(city.td.a["href"]).split("/")[0])[1].split(".")[0]   
+            branch.code = str(city.td.a["href"]).split("/")[1].split(str(city.td.a["href"]).split("/")[0])[1].split(".")[0] 
+            branch.fullcode = city.td.text
             branch.url = url.split(".html")[0] + "/" + str(city.td.a["href"]).split("/")[1]
             branch.type = "city"
-            print(str(branch.superior.name) + " " + str(branch.name))
+            print(branch.getFullname())
+            #print(str(branch.fullcode) + " " + str(branch.superior.name) + " "
+            #+ str(branch.name))
             branches.append(branch)
             branch.loadAllBranches()
             pass
@@ -63,18 +68,23 @@ def loadBranches(soup,type,url,superior):
             branch = Node()
             branch.superior = superior
             branch.type = "county"
+            branch.fullcode = county.td.text
             if county.td.a:
                 branch.name = county.td.nextSibling.a.text
                 temp = superior.url.split("/")
                 temp[len(temp) - 1] = str(county.td.nextSibling.a["href"])
                 temp = "/".join(temp)
                 branch.url = temp
-                print(branch.superior.name + " " + branch.name)
+                print(branch.getFullname())
+                #print(str(branch.fullcode) + " " + branch.superior.name + " "
+                #+ branch.name)
                 branch.loadAllBranches()
                 pass
             else:
                 branch.name = county.td.nextSibling.text
-                print(branch.superior.name + " " + branch.name)
+                print(branch.getFullname())
+                #print(str(branch.fullcode) + " " + branch.superior.name + " "
+                #+ branch.name)
                 pass
             branches.append(branch)
             pass
@@ -88,19 +98,24 @@ def loadBranches(soup,type,url,superior):
             branch = Node()
             branch.superior = superior
             branch.type = "town"
+            branch.fullcode = town.td.text
             if town.td.a:
                 branch.name = town.td.nextSibling.a.text
                 temp = superior.url.split("/")
                 temp[len(temp) - 1] = str(town.td.nextSibling.a["href"])
                 temp = "/".join(temp)
                 branch.url = temp
-                print(branch.superior.name + " " + branch.name)
+                print(branch.getFullname())
+                #print(str(branch.fullcode) + " " + branch.superior.name + " "
+                #+ branch.name)
                 #print(branch.superior.name + " " + branch.name + branch.url)
                 branch.loadAllBranches()
                 pass
             else:
                 branch.name = town.td.nextSibling.text
-                print(branch.superior.name + " " + branch.name)
+                print(branch.getFullname())
+                #print(str(branch.fullcode) + " " + branch.superior.name + " "
+                #+ branch.name)
                 pass
             branches.append(branch)
         pass
@@ -113,31 +128,57 @@ def loadBranches(soup,type,url,superior):
             branch = Node()
             branch.superior = superior
             branch.type = "village"
+            branch.fullcode = village.td.text
             if village.td.a:
-                branch.name = town.td.nextSibling.nextSibling.a.text
+                branch.name = village.td.nextSibling.nextSibling.a.text
                 temp = superior.url.split("/")
                 temp[len(temp) - 1] = str(village.td.nextSibling.a["href"])
                 temp = "/".join(temp)
                 branch.url = temp
-                print(branch.superior.name + " " + branch.name + branch.url)
+                print(branch.getFullname())
                 branch.loadAllBranches()
                 pass
             else:
                 branch.name = village.td.nextSibling.nextSibling.text
-                print(branch.superior.name + " " + branch.name)
+                #print(str(branch.fullcode) + " " + branch.superior.name + " "+
+                #branch.name)
+                print(branch.getFullname())
+                #print(getSupAndSelf(branch))
                 pass
             branches.append(branch)
         pass
 
     pass
+class Node(object):
+    #def getFullname(self):
+    #    if self.superior is None:
+    #        return str(self.name)
+    #    else:
+    #        temp = str(self.superior.getFullname())
+    #        return str(temp) + str(self.name)
+    #    pass
 
-class Node():
+    def getFullname(self):
+        if self.type == "village":
+            return self.superior.superior.superior.superior.superior.name + " " + self.superior.superior.superior.superior.name + " " + self.superior.superior.superior.name + " " + self.superior.superior.name + " " + self.superior.name + " " + self.name
+        if self.type == "town":
+            return self.superior.superior.superior.superior.name + " " + self.superior.superior.superior.name + " " + self.superior.superior.name + " " + self.superior.name + " " + self.name
+        if self.type == "county":
+            return self.superior.superior.superior.name + " " + self.superior.superior.name + " " + self.superior.name + " " + self.name
+        if self.type == "city":
+            return (self.superior.superior.name + " " + self.superior.name + " " + self.name)
+        if self.type == "province":
+            return (self.superior.name + " " + self.name)
+
     name = ""
     url = ""
     type = ""
     code = ""
+    fullcode = ""
     superior = ""
     branches = []
+
+
 
     def loadAllBranches(self):
         html = download(self.url)
@@ -145,12 +186,24 @@ class Node():
         type = self.type
         self.branches = loadBranches(soup,type,self.url,self)
         pass
+
+    
+
+
     pass
 
+#def getSupAndSelf(sel=Node()):
+#    if sel.superior is None:
+#        return sel.name
+#    else:
+#        return getSupAndSelf(sel.superior) + sel.name
+#    pass
 china = Node()
+#print(china.getFullname())
 china.name = "中华人民共和国"
 china.url = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/"
 china.type = "nation"
+#print(china.getFullname())
 china.loadAllBranches()
 print(china.branches)
 
