@@ -17,7 +17,7 @@ def download(url):
 
 #输入content,输出bs对象
 def bsparse(html):
-    soup = bs4.BeautifulSoup(html,"html.parser")
+    soup = bs4.BeautifulSoup(html,"html.parser",from_encoding="gb18030")
     return soup
 
 def loadBranches(soup,type,url,superior):
@@ -62,14 +62,28 @@ def loadBranches(soup,type,url,superior):
         for county in counties:
             branch = Node()
             branch.superior = superior
+            branch.type = "county"
             if county.td.a:
                 branch.name = county.td.nextSibling.a.text
-
+                temp = superior.url.split("/")
+                temp[len(temp)-1]=str(county.td.nextSibling.a["href"])
+                temp="/".join(temp)
+                branch.url = temp
+                print(branch.superior.name + " " + branch.name)
+                branch.loadAllBranches()
                 pass
             else:
                 branch.name = county.td.nextSibling.text
-            print(branch.superior.name + " " + branch.name)
+                print(branch.superior.name + " " + branch.name)
+                pass
+            branches.append(branch)
+            pass
         pass
+
+    if type == "county":
+        print("load all town(s) of " + superior.name)
+        pass
+    pass
 
 class Node():
     name = ""
@@ -87,18 +101,29 @@ class Node():
         pass
     pass
 
-#china = Node()
-#china.name = "中华人民共和国"
-#china.url = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/"
-#china.type = "nation"
-#china.loadAllBranches()
-#print(china.branches)
+china = Node()
+china.name = "中华人民共和国"
+china.url = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/"
+china.type = "nation"
+china.loadAllBranches()
+print(china.branches)
 
-anhui=Node()
-anhui.name="安徽省"
-anhui.url="http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/34.html"
-anhui.type="province"
-anhui.loadAllBranches()
+#anhui=Node()
+#anhui.name="河北省"
+#anhui.url="http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/13.html"
+#anhui.type="province"
+#anhui.loadAllBranches()
+
+#anhui=Node()
+#anhui.name="安徽省"
+#anhui.url="http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/34.html"
+#anhui.type="province"
+#anhui.loadAllBranches()
+
+#wuhu = Node()
+#wuhu.url = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/34/3402.html"
+#wuhu.type = "city"
+#wuhu.loadAllBranches()
 
 #suzhou = Node()
 #suzhou.url = "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/34/3413.html"
