@@ -150,32 +150,42 @@ def loadBranches(soup,type,url,superior):
 
     pass
 class Node(object):
-    #def getFullname(self):
-    #    if self.superior is None:
-    #        return str(self.name)
-    #    else:
-    #        temp = str(self.superior.getFullname())
-    #        return str(temp) + str(self.name)
-    #    pass
-
     def getFullname(self):
-        if self.type == "village":
-            return self.superior.superior.superior.superior.superior.name + " " + self.superior.superior.superior.superior.name + " " + self.superior.superior.superior.name + " " + self.superior.superior.name + " " + self.superior.name + " " + self.name
-        if self.type == "town":
-            return self.superior.superior.superior.superior.name + " " + self.superior.superior.superior.name + " " + self.superior.superior.name + " " + self.superior.name + " " + self.name
-        if self.type == "county":
-            return self.superior.superior.superior.name + " " + self.superior.superior.name + " " + self.superior.name + " " + self.name
-        if self.type == "city":
-            return (self.superior.superior.name + " " + self.superior.name + " " + self.name)
-        if self.type == "province":
-            return (self.superior.name + " " + self.name)
+        if self.superior is None:
+            return str(self.name)
+        else:
+            temp = str(self.superior.getFullname())
+            return str(temp) + str(self.name)
+        pass
+
+    #def getFullname(self):
+    #    if self.type == "village":
+    #        return self.superior.superior.superior.superior.superior.name + "
+    #        " + self.superior.superior.superior.superior.name + " " +
+    #        self.superior.superior.superior.name + " " +
+    #        self.superior.superior.name + " " + self.superior.name + " " +
+    #        self.name
+    #    if self.type == "town":
+    #        return self.superior.superior.superior.superior.name + " " +
+    #        self.superior.superior.superior.name + " " +
+    #        self.superior.superior.name + " " + self.superior.name + " " +
+    #        self.name
+    #    if self.type == "county":
+    #        return self.superior.superior.superior.name + " " +
+    #        self.superior.superior.name + " " + self.superior.name + " " +
+    #        self.name
+    #    if self.type == "city":
+    #        return (self.superior.superior.name + " " + self.superior.name + "
+    #        " + self.name)
+    #    if self.type == "province":
+    #        return (self.superior.name + " " + self.name)
 
     name = ""
     url = ""
     type = ""
     code = ""
     fullcode = ""
-    superior = ""
+    superior = None
     branches = []
 
 
